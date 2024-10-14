@@ -1,55 +1,91 @@
-/* eslint-disable */
 import "bootstrap";
 import "./style.css";
 
-// Funcion para obtener un valor aleatorio de carta (0 to 12)
-let generateRandomNumber = () => {
-  let numbers = [
-    "A",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "J",
-    "Q",
-    "K"
-  ];
-  let randomIndex = Math.floor(Math.random() * numbers.length);
-  return numbers[randomIndex];
+window.onload = function() {
+  createCard(pickACard());
+  document.querySelector("#button").addEventListener("click", () => {
+    createCard(pickACard());
+  });
+
+  document.querySelector("#setTimeButton").addEventListener("click", () => {
+    const userTime = parseInt(document.querySelector("#timeInput").value);
+    if (!isNaN(userTime) && userTime > 0) {
+      setReloadTime(userTime);
+    } else {
+      alert("Please enter a valid positive number.");
+    }
+  });
 };
 
-// Funcion para obtener un palo al azar (de 1 a 4)
-let generateRandomSuit = () => {
-  let suits = ["♦", "♠", "♥", "♣"];
-  let randomIndex = Math.floor(Math.random() * suits.length);
-  return suits[randomIndex];
+const Card = {
+  suits: ["♦", "♥", "♠", "♣"],
+  cardValues: ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 };
 
-// Función para generar una carta virtual
-function generateCard() {
-  const cardNumber = document.getElementById("card-number");
-  const cardSuitTop = document.getElementById("card-suit-top");
-  const cardSuitBottom = document.getElementById("card-suit-bottom");
+let reloadTime = 1000; // Default reload time
+let countdownInterval; // Declare the countdown interval variable globally
 
-  const randomSuit = generateRandomSuit();
-  cardNumber.textContent = generateRandomNumber();
+function pickACard() {
+  let a = Math.floor(Math.random() * Card.suits.length);
+  let b = Math.floor(Math.random() * Card.cardValues.length);
 
-  // Cambia el color de los palos segun el tipo
-
-  if (randomSuit === "♥" || randomSuit === "♦") {
-    cardSuitTop.style.color = cardSuitBottom.style.color = "red";
-  } else {
-    cardSuitTop.style.color = cardSuitBottom.style.color = "black";
-  }
-
-  cardSuitTop.textContent = `${randomSuit}`;
-  cardSuitBottom.textContent = `${randomSuit}`;
+  let selectedCard = {
+    suit: Card.suits[a],
+    value: Card.cardValues[b]
+  };
+  return selectedCard;
 }
 
-// Llama a la función al cargar la página
-window.onload = generateCard;
+function createCard(cardObject) {
+  console.log("Creating card:", cardObject);
+  let suitString = cardObject.suit;
+  let valueString = cardObject.value;
+
+  document.querySelector(".suit").innerHTML = suitString;
+  document.querySelector(".rotated").innerHTML = suitString;
+
+  if (cardObject.suit === "♠" || cardObject.suit === "♣") {
+    document.querySelector(".suit").classList.add("black");
+    document.querySelector(".rotated").classList.add("black");
+  } else {
+    document.querySelector(".suit").classList.remove("black");
+    document.querySelector(".rotated").classList.remove("black");
+  }
+
+  document.querySelector(".value").innerHTML = valueString;
+
+  clearCountdown();
+  startCountdown(reloadTime);
+}
+
+let contador = 10;
+function startCountdown(seconds) {
+  document.getElementById("contador").innerText = `Time to reload: ${contador}`;
+
+  countdownInterval = setInterval(() => {
+    contador--;
+    document.getElementById(
+      "contador"
+    ).innerText = `Time to reload: ${contador}`;
+
+    if (contador <= 0) {
+      clearInterval(countdownInterval);
+      window.location.reload();
+    }
+  }, 1000);
+}
+
+function clearCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+function setReloadTime(newTime) {
+  contador = newTime;
+
+  document.getElementById(
+    "contador"
+  ).innerText = `Reload time set to: ${contador / 1000} seconds`;
+}
